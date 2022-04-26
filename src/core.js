@@ -21,7 +21,7 @@ class Core {
   };
   
   setupPlugins = () => {
-    for (const [pluginName, { activeVersion, instance }] of Object.entries(this.plugins)) {
+    for (const [pluginName, { instance }] of Object.entries(this.plugins)) {
       const contract = instance.setup(this.setupContracts);
       this.plugins[pluginName].setup = contract;
       this.setupContracts[pluginName] = new Proxy(contract || {}, this.proxyHandler(pluginName, 'setup'));
@@ -29,7 +29,7 @@ class Core {
   }
 
   startPlugins = () => {
-    for (const [pluginName, { activeVersion, instance }] of Object.entries(this.plugins)) {
+    for (const [pluginName, { instance }] of Object.entries(this.plugins)) {
       const contract = instance.start(this.startContracts);
       this.plugins[pluginName].start = contract;
       this.startContracts[pluginName] = new Proxy(contract || {}, this.proxyHandler(pluginName, 'start'));
@@ -44,13 +44,13 @@ class Core {
       setup: null,
       start: null,
     }
-    // for demo purposes refresh all plugins instead only of the plugin itself and their dependendants graph
+    // for demo purposes refresh all plugins instead only of the plugin itself and their dependendents graph
     this.setupPlugins();
     this.startPlugins();
   }
 
   stopPlugins = () => {
-    for (const [pluginName, { activeVersion, instance }] of Object.entries(this.plugins)) {
+    for (const { instance } of Object.values(this.plugins)) {
       instance.stop();
     }
   }
