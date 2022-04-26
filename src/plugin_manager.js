@@ -7,17 +7,16 @@ class PluginManager {
   }
 
   registerPlugin = async (pluginName, activeVersion) => {
-    const pluginPath = this.versionToPluginPath(activeVersion)
+    const pluginPath = this.versionToPluginPath(pluginName, activeVersion)
     const plugin = await isolatePlugin({ pluginPath });
-    const pluginInstance = new plugin.plugin.Plugin();
     const pluginObject = {
       pluginName,
       activeVersion,
-      plugin: { ...plugin, pluginInstance },
+      plugin,
     }
 
     this.pluginsMatrix[pluginName] = pluginObject;
-    return pluginInstance;
+    return pluginObject;
   }
 
   reloadNewVersion = async (pluginName, activeVersion) => {
@@ -36,15 +35,14 @@ class PluginManager {
   shutdownPlugin = async (pluginName) => {
     const pluginObject = this.pluginsMatrix[pluginName];
     // clean existing plugin
-    await pluginObject.plugin.pluginInstance.stop();
     await pluginObject.plugin.teardown();
     this.pluginsMatrix[pluginName] = null;
   }
 
-  versionToPluginPath = (version) => {
+  versionToPluginPath = (pluginName, version) => {
     const versionToPath = version.replace(/\./g, '_');
 
-    return path.join(this.externalBasePath, `v${versionToPath}`);
+    return path.join(this.externalBasePath, `${pluginName}_v${versionToPath}`);
   }
 
   getPluginActiveVersion = (pluginName) => {
